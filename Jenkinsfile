@@ -27,9 +27,7 @@ pipeline {
                     /kaniko/executor \
                       --dockerfile Dockerfile \
                       --context $(pwd) \
-                      --destination $ECR_REPO:latest \
-                      --insecure \
-                      --skip-tls-verify
+                      --destination $ECR_REPO:latest
                     '''
                 }
             }
