@@ -5,11 +5,6 @@ pipeline {
         }
     }
 
-    environment {
-        AWS_REGION = "ap-south-1"
-        ECR_REPO = "131127508996.dkr.ecr.ap-south-1.amazonaws.com/java-app-demo-eks"
-    }
-
     stages {
 
         stage('Build Java App') {
@@ -26,8 +21,8 @@ pipeline {
                     sh '''
                     /kaniko/executor \
                       --dockerfile Dockerfile \
-                      --context $(pwd) \
-                      --destination $ECR_REPO:latest
+                      --context . \
+                      --destination 131127508996.dkr.ecr.ap-south-1.amazonaws.com/java-app-demo-eks:latest
                     '''
                 }
             }
