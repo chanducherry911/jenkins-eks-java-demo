@@ -44,9 +44,7 @@ pipeline {
                         chmod +x kubectl
                         mv kubectl /usr/local/bin/
 
-                        aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER_NAME}
-
-                        kubectl create namespace java-app || true
+                        aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER_NAME}                       
 
                         kubectl apply -n java-app -f deployment.yaml
                         kubectl apply -n java-app -f service.yaml
