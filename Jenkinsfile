@@ -8,7 +8,6 @@ pipeline {
     environment {
         AWS_REGION = "ap-south-1"
         ECR_REPO = "131127508996.dkr.ecr.ap-south-1.amazonaws.com/java-app-demo-eks"
-        IMAGE_TAG = "latest"
     }
 
     stages {
@@ -21,33 +20,16 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build and Push Image') {
             steps {
-                container('docker') {
+                container('kaniko') {
                     sh '''
-                    docker build -t java-app .
-                    docker tag java-app:latest $ECR_REPO:$IMAGE_TAG
-                    '''
-                }
-            }
-        }
-
-        stage('Login to ECR') {
-            steps {
-                container('docker') {
-                    sh '''
-                    aws ecr get-login-password --region $AWS_REGION \
-                    | docker login --username AWS --password-stdin $ECR_REPO
-                    '''
-                }
-            }
-        }
-
-        stage('Push Image to ECR') {
-            steps {
-                container('docker') {
-                    sh '''
-                    docker push $ECR_REPO:$IMAGE_TAG
+                    /kaniko/executor \
+                      --dockerfile Dockerfile \
+                      --context $(pwd) \
+                      --destination $ECR_REPO:latest \
+                      --insecure \
+                      --skip-tls-verify
                     '''
                 }
             }
