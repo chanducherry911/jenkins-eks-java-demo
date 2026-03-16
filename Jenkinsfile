@@ -6,9 +6,9 @@ pipeline {
     }
 
     environment {
-        AWS_REGION = "ap-south-1"
+        AWS_REGION   = "ap-south-1"
         CLUSTER_NAME = "rapy-eks-cluster"
-        ECR_REPO = "131127508996.dkr.ecr.ap-south-1.amazonaws.com/java-app-demo-eks"
+        ECR_REPO     = "131127508996.dkr.ecr.ap-south-1.amazonaws.com/java-app-demo-eks"
     }
 
     stages {
@@ -40,6 +40,13 @@ pipeline {
             steps {
                 container('kubectl') {
                     sh '''
+                        apt-get update -y
+                        apt-get install -y curl unzip
+
+                        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                        unzip awscliv2.zip
+                        ./aws/install
+
                         aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER_NAME}
 
                         kubectl create namespace java-app --dry-run=client -o yaml | kubectl apply -f -
