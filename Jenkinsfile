@@ -37,26 +37,18 @@ pipeline {
         }
 
         stage('Deploy to EKS') {
-            steps {
-                container('kubectl') {
-                    sh '''
-                        apt-get update -y
-                        apt-get install -y curl unzip
+    steps {
+        container('kubectl') {
+            sh '''
+                aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER_NAME}
 
-                        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-                        unzip awscliv2.zip
-                        ./aws/install
+                kubectl create namespace java-app --dry-run=client -o yaml | kubectl apply -f -
 
-                        aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER_NAME}
+                kubectl apply -n java-app -f deployment.yaml
+                kubectl apply -n java-app -f service.yaml
 
-                        kubectl create namespace java-app --dry-run=client -o yaml | kubectl apply -f -
-
-                        kubectl apply -n java-app -f deployment.yaml
-                        kubectl apply -n java-app -f service.yaml
-                    '''
-                }
-            }
+                kubectl get pods -n java-app
+            '''
         }
-
     }
 }
