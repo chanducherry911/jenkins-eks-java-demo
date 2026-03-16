@@ -10,7 +10,9 @@ pipeline {
         stage('Build Java App') {
             steps {
                 container('maven') {
-                    sh 'mvn clean package'
+                    sh '''
+                        mvn clean package
+                    '''
                 }
             }
         }
@@ -19,10 +21,10 @@ pipeline {
             steps {
                 container('kaniko') {
                     sh '''
-                    /kaniko/executor \
-                      --dockerfile Dockerfile \
-                      --context . \
-                      --destination 131127508996.dkr.ecr.ap-south-1.amazonaws.com/java-app-demo-eks:latest
+                        /kaniko/executor \
+                          --dockerfile Dockerfile \
+                          --context . \
+                          --destination 131127508996.dkr.ecr.ap-south-1.amazonaws.com/java-app-demo-eks:latest
                     '''
                 }
             }
@@ -30,11 +32,15 @@ pipeline {
 
         stage('Deploy to EKS') {
             steps {
-                sh '''
-                kubectl create namespace demo --dry-run=client -o yaml | kubectl apply -f -
-                kubectl apply -f deployment.yaml
-                kubectl apply -f service.yaml
-                '''
+                container('kubectl') {
+                    sh '''
+                        kubectl create namespace java-app --dry-run=client -o yaml | kubectl apply -f -
+
+                        kubectl apply -n java-app -f deployment.yaml
+
+                        kubectl apply -n java-app -f service.yaml
+                    '''
+                }
             }
         }
 
