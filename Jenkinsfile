@@ -7,15 +7,16 @@ pipeline {
 
     stages {
 
-        stage('Clone Repo') {
+        stage('Clone Repository') {
             steps {
-                git 'https://github.com/YOUR_USERNAME/java-eks-jenkins-demo.git'
+                git 'https://github.com/chanducherry911/jenkins-eks-java-demo.git'
             }
         }
 
-        stage('Build App') {
+        stage('Build Java App') {
             steps {
                 container('maven') {
+                    sh 'mvn -version'
                     sh 'mvn clean package'
                 }
             }
