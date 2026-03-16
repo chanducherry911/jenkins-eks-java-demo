@@ -16,9 +16,7 @@ pipeline {
         stage('Build Java App') {
             steps {
                 container('maven') {
-                    sh '''
-                        mvn clean package
-                    '''
+                    sh 'mvn clean package'
                 }
             }
         }
@@ -26,12 +24,12 @@ pipeline {
         stage('Build and Push Image') {
             steps {
                 container('kaniko') {
-                    sh '''
-                        /kaniko/executor \
-                        --dockerfile Dockerfile \
-                        --context . \
-                        --destination ${ECR_REPO}:latest
-                    '''
+                    sh """
+                    /kaniko/executor \
+                      --dockerfile Dockerfile \
+                      --context . \
+                      --destination ${ECR_REPO}:latest
+                    """
                 }
             }
         }
@@ -39,16 +37,16 @@ pipeline {
         stage('Deploy to EKS') {
             steps {
                 container('kubectl') {
-                    sh '''
-                        aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER_NAME}
+                    sh """
+                    aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER_NAME}
 
-                        kubectl create namespace java-app --dry-run=client -o yaml | kubectl apply -f -
+                    kubectl create namespace java-app --dry-run=client -o yaml | kubectl apply -f -
 
-                        kubectl apply -n java-app -f deployment.yaml
-                        kubectl apply -n java-app -f service.yaml
+                    kubectl apply -n java-app -f deployment.yaml
+                    kubectl apply -n java-app -f service.yaml
 
-                        kubectl get pods -n java-app
-                    '''
+                    kubectl get pods -n java-app
+                    """
                 }
             }
         }
