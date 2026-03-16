@@ -7,12 +7,6 @@ pipeline {
 
     stages {
 
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/chanducherry911/jenkins-eks-java-demo.git'
-            }
-        }
-
         stage('Build Java App') {
             steps {
                 container('maven') {
@@ -21,6 +15,3 @@ pipeline {
                 }
             }
         }
-
-    }
-}
