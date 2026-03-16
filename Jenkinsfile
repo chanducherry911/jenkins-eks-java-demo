@@ -24,12 +24,12 @@ pipeline {
         stage('Build and Push Image') {
             steps {
                 container('kaniko') {
-                    sh """
-                    /kaniko/executor \
-                      --dockerfile Dockerfile \
-                      --context . \
-                      --destination ${ECR_REPO}:latest
-                    """
+                    sh '''
+                        /kaniko/executor \
+                        --dockerfile Dockerfile \
+                        --context . \
+                        --destination ${ECR_REPO}:latest
+                    '''
                 }
             }
         }
@@ -37,16 +37,20 @@ pipeline {
         stage('Deploy to EKS') {
             steps {
                 container('kubectl') {
-                    sh """
-                    aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER_NAME}
+                    sh '''
+                        curl -LO https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl
+                        chmod +x kubectl
+                        mv kubectl /usr/local/bin/
 
-                    kubectl create namespace java-app --dry-run=client -o yaml | kubectl apply -f -
+                        aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER_NAME}
 
-                    kubectl apply -n java-app -f deployment.yaml
-                    kubectl apply -n java-app -f service.yaml
+                        kubectl create namespace java-app --dry-run=client -o yaml | kubectl apply -f -
 
-                    kubectl get pods -n java-app
-                    """
+                        kubectl apply -n java-app -f deployment.yaml
+                        kubectl apply -n java-app -f service.yaml
+
+                        kubectl get pods -n java-app
+                    '''
                 }
             }
         }
